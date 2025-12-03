@@ -1,3 +1,16 @@
+let player;
+let platforms = [];
+let gameStarted = false;
+let gameOver = false;
+
+// SETUP
+
+function setup() {
+  createCanvas(500, 700);
+
+  startGame();
+}
+
 import platform from "platform";
 import { Character } from "./character";
 
@@ -49,3 +62,4 @@ function keyPressed() {
     character.y -= 120;
   }
 }
+
