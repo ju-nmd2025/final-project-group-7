@@ -27,7 +27,7 @@ function drawObstacle() {
 }
 
 let canvasWidth = 400;
-fghjk;
+
 let canvasHeight = 400;
 let floor = 300;
 let character = new Character(50, 50, 50, 50);
