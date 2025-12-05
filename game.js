@@ -26,10 +26,7 @@ function initializeGame() {
   platforms.push(firstPlatform);
 
   // Player stands on it
-  player = new Player(
-    firstPlatform.x,
-    firstPlatform.y - 30 / 2 - firstPlatform.h / 2
-  );
+  player = new Player(firstPlatform.x, firstPlatform.y - 30 / 2 - firstPlatform.h / 2);
 
   // Other platforms
   for (let i = 1; i < NUM_PLATFORMS; i++) {
@@ -43,9 +40,7 @@ function spawnPlatform() {
   while (!placed) {
     const px = random(50, width - 50);
     const py = random(50, height - 50);
-    const overlaps = platforms.some(
-      (p) => abs(px - p.x) < 80 && abs(py - p.y) < 50
-    );
+    const overlaps = platforms.some(p => abs(px - p.x) < 80 && abs(py - p.y) < 50);
     if (!overlaps) {
       const type = selectPlatformType();
       platforms.push(new Platform(px, py, type));
@@ -134,15 +129,9 @@ function draw() {
   background(150, 200, 255);
 
   switch (gameState) {
-    case "start":
-      drawStartScreen();
-      break;
-    case "gameover":
-      drawGameOverScreen();
-      break;
-    case "playing":
-      playGame();
-      break;
+    case "start": drawStartScreen(); break;
+    case "gameover": drawGameOverScreen(); break;
+    case "playing": playGame(); break;
   }
 }
 
@@ -193,7 +182,7 @@ function scrollScreen() {
     const diff = height / 2 - player.y;
     player.y = height / 2;
 
-    platforms.forEach((p) => {
+    platforms.forEach(p => {
       p.y += diff;
     });
 
@@ -205,7 +194,7 @@ function scrollScreen() {
 function handleCollisions() {
   player.onPlatform = false;
 
-  platforms.forEach((p) => {
+  platforms.forEach(p => {
     if (
       player.vy >= 0 &&
       player.x > p.x - p.w / 2 &&
@@ -232,7 +221,7 @@ function handleCollisions() {
 
 // ---------------- Platform Updates ----------------
 function updatePlatforms() {
-  platforms.forEach((p) => {
+  platforms.forEach(p => {
     if (p.type === "moving") {
       p.x += p.dx;
       if (p.x < 0 || p.x > width) p.dx *= -1;
@@ -251,15 +240,12 @@ function updatePlatforms() {
 }
 
 function drawPlatforms() {
-  platforms.forEach((p) => p.draw());
+  platforms.forEach(p => p.draw());
 }
 
 // ---------------- Controls ----------------
 function keyPressed() {
-  if (
-    (gameState === "start" || gameState === "gameover") &&
-    keyCode === ENTER
-  ) {
+  if ((gameState === "start" || gameState === "gameover") && keyCode === ENTER) {
     initializeGame();
     gameState = "playing";
   }
