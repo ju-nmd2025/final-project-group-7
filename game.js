@@ -1,238 +1,276 @@
+import Player from "./player.js";
+import Platform from "./platform.js";
+
 let player;
 let platforms = [];
 let score = 0;
-let gameState = "start"; // start, playing, gameover
+let gameState = "start";
+let playerReadyToJump = false;
 
 const NUM_PLATFORMS = 10;
 
+// ---------------- Setup ----------------
 function setup() {
   createCanvas(400, 600);
-  startGame();
+  initializeGame();
 }
 
-function startGame() {
-  // Player
-  player = {
-    x: width / 2,
-    y: height - 80,
-    size: 40,
-    vy: -10,
-    gravity: 0.3,
-    jumpPower: -10,
-    springPower: -20, // boosted jump for springs
-  };
-
-  // RANDOMIZED + NON-OVERLAPPING PLATFORMS
+// ---------------- Initialize Game ----------------
+function initializeGame() {
   platforms = [];
-
-  for (let i = 0; i < NUM_PLATFORMS; i++) {
-    let placed = false;
-
-    while (!placed) {
-      let px = random(50, width - 50);
-      let py = random(50, height - 50);
-
-      let overlapping = false;
-
-      // Check overlap
-      for (let p of platforms) {
-        if (abs(px - p.x) < 80 && abs(py - p.y) < 50) {
-          overlapping = true;
-          break;
-        }
-      }
-
-      if (!overlapping) {
-        generatePlatform(px, py);
-        placed = true;
-      }
-    }
-  }
-
   score = 0;
+  playerReadyToJump = false;
+
+  // First grey platform under player
+  const firstPlatform = new Platform(width / 2, height - 50, "unbreakable");
+  platforms.push(firstPlatform);
+
+  // Player stands on it
+  player = new Player(
+    firstPlatform.x,
+    firstPlatform.y - 30 / 2 - firstPlatform.h / 2
+  );
+
+  // Other platforms
+  for (let i = 1; i < NUM_PLATFORMS; i++) {
+    spawnPlatform();
+  }
 }
 
-function generatePlatform(x, y) {
-  const r = random();
-
-  let type = "normal";
-
-  // Increased breaking probability
-  if (r < 0.35) type = "breaking";
-  else if (r < 0.5) type = "moving";
-
-  // Add the platform
-  let platform = {
-    x: x,
-    y: y,
-    w: 70,
-    h: 15,
-    type: type,
-    dx: type === "moving" ? random(1, 2) : 0,
-    broken: false,
-    spring: null, // NEW: spring object attachment
-  };
-
-  // --- SPRING LOGIC ---
-  // Springs only appear when height is NOT even
-  // AND platform is not breaking
-  if (y % 2 !== 0 && type !== "breaking") {
-    if (random() < 0.4) {
-      // 40% chance to have a spring
-      platform.spring = {
-        x: x,
-        y: y - 15, // drawn above platform
-        size: 20,
-        used: false,
-      };
+// ---------------- Platform Functions ----------------
+function spawnPlatform() {
+  let placed = false;
+  while (!placed) {
+    const px = random(50, width - 50);
+    const py = random(50, height - 50);
+    const overlaps = platforms.some(
+      (p) => abs(px - p.x) < 80 && abs(py - p.y) < 50
+    );
+    if (!overlaps) {
+      const type = selectPlatformType();
+      platforms.push(new Platform(px, py, type));
+      placed = true;
     }
   }
-
-  platforms.push(platform);
 }
 
+function selectPlatformType() {
+  const r = random();
+  if (r < 0.1) return "black"; // 10% black breakable
+  if (r < 0.25) return "breakable"; // 15% green breakable
+  if (r < 0.4) return "moving"; // 15% green moving
+  return "unbreakable"; // 60% grey unbreakable
+}
+
+function spawnPlatformAbove() {
+  const px = random(50, width - 50);
+  const py = -20;
+  const type = selectPlatformType();
+  platforms.push(new Platform(px, py, type));
+}
+
+// ---------------- Classes ----------------
+class Player {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = 30;
+    this.vx = 0;
+    this.vy = 0;
+    this.gravity = 0.6;
+    this.jumpPower = -12;
+    this.speed = 5;
+    this.onPlatform = true; // start on first grey platform
+  }
+
+  move() {
+    if (keyIsDown(LEFT_ARROW)) this.vx = -this.speed;
+    else if (keyIsDown(RIGHT_ARROW)) this.vx = this.speed;
+    else this.vx = 0;
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Apply gravity only if not on grey platform or already jumped
+    if (!this.onPlatform || playerReadyToJump) {
+      this.vy += this.gravity;
+    } else {
+      this.vy = 0;
+    }
+
+    if (this.x < 0) this.x = width;
+    if (this.x > width) this.x = 0;
+  }
+
+  draw() {
+    fill(255, 100, 100);
+    ellipse(this.x, this.y, this.size);
+  }
+}
+
+class Platform {
+  constructor(x, y, type) {
+    this.x = x;
+    this.y = y;
+    this.w = 80;
+    this.h = 15;
+    this.type = type;
+    this.broken = false;
+    this.dx = type === "moving" ? random(1, 3) : 0;
+  }
+
+  draw() {
+    if (this.type === "unbreakable") fill(150); // grey
+    else if (this.type === "breakable") fill(0, 200, 0); // green
+    else if (this.type === "black") fill(0); // black
+    else fill(0, 200, 0); // moving green
+    rectMode(CENTER);
+    rect(this.x, this.y, this.w, this.h, 5);
+  }
+}
+
+// ---------------- Game Loop ----------------
 function draw() {
   background(150, 200, 255);
 
-  if (gameState === "start") {
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(30);
-    text("Press ENTER to Start", width / 2, height / 2);
-    return;
+  switch (gameState) {
+    case "start":
+      drawStartScreen();
+      break;
+    case "gameover":
+      drawGameOverScreen();
+      break;
+    case "playing":
+      playGame();
+      break;
+  }
+}
+
+// ---------------- Screens ----------------
+function drawStartScreen() {
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(30);
+  text("Press ENTER to Start", width / 2, height / 2);
+}
+
+function drawGameOverScreen() {
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(35);
+  text("GAME OVER!", width / 2, height / 2 - 30);
+  textSize(20);
+  text(`Score: ${score}`, width / 2, height / 2 + 10);
+  text("Press ENTER to Replay", width / 2, height / 2 + 50);
+}
+
+// ---------------- Game Mechanics ----------------
+function playGame() {
+  player.move();
+  if (playerReadyToJump) {
+    scrollScreen();
+    handleCollisions();
+    updatePlatforms();
   }
 
-  if (gameState === "gameover") {
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(35);
-    text("GAME OVER!", width / 2, height / 2 - 30);
-
-    textSize(20);
-    text("Score: " + score, width / 2, height / 2 + 10);
-    text("Press ENTER to Replay", width / 2, height / 2 + 50);
-    return;
-  }
-
-  updatePlayer();
-  updatePlatforms();
   drawPlatforms();
-  drawPlayer();
+  player.draw();
 
   fill(0);
   textSize(20);
-  text("Score: " + score, 20, 30);
+  text(`Score: ${score}`, 20, 30);
+
+  if (!playerReadyToJump) {
+    fill(0);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text("Press UP to Jump", width / 2, height / 2 - 50);
+  }
 }
 
-function updatePlayer() {
-  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) player.x -= 5;
-  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) player.x += 5;
-
-  if (player.x < 0) player.x = width;
-  if (player.x > width) player.x = 0;
-
-  player.vy += player.gravity;
-  player.y += player.vy;
-
+function scrollScreen() {
   if (player.y < height / 2) {
-    let diff = height / 2 - player.y;
+    const diff = height / 2 - player.y;
     player.y = height / 2;
 
-    for (let p of platforms) {
+    platforms.forEach((p) => {
       p.y += diff;
-      if (p.spring) p.spring.y += diff;
-    }
+    });
 
     score += Math.floor(diff);
   }
-
-  // PLATFORM + SPRING COLLISIONS
-  for (let p of platforms) {
-    // --- SPRING COLLISION ----
-    if (p.spring && !p.spring.used) {
-      if (
-        dist(player.x, player.y + player.size / 2, p.spring.x, p.spring.y) <
-          30 &&
-        player.vy > 0
-      ) {
-        player.vy = player.springPower; // BIG jump
-        p.spring.used = true;
-      }
-    }
-
-    // --- PLATFORM COLLISION ---
-    if (
-      player.vy > 0 &&
-      player.x > p.x - p.w / 2 &&
-      player.x < p.x + p.w / 2 &&
-      player.y + player.size / 2 > p.y - p.h / 2 &&
-      player.y + player.size / 2 < p.y + p.h / 2
-    ) {
-      if (p.type === "breaking") {
-        if (!p.broken) p.broken = true;
-      } else {
-        player.vy = player.jumpPower;
-      }
-    }
-  }
-
-  if (player.y > height + 100) {
-    gameState = "gameover";
-  }
 }
 
+// ---------------- Collision Handling ----------------
+function handleCollisions() {
+  player.onPlatform = false;
+
+  platforms.forEach((p) => {
+    if (
+      player.vy >= 0 &&
+      player.x > p.x - p.w / 2 &&
+      player.x < p.x + p.w / 2 &&
+      player.y + player.size / 2 >= p.y - p.h / 2 &&
+      player.y + player.size / 2 <= p.y + p.h / 2
+    ) {
+      if (p.type === "unbreakable") {
+        player.onPlatform = true;
+        player.vy = 0;
+        player.y = p.y - player.size / 2 - p.h / 2; // snap to grey platform
+      } else if (p.type === "breakable" || p.type === "black") {
+        player.vy = 0;
+        p.broken = true; // green or black platform breaks
+      } else if (p.type === "moving") {
+        player.vy = 0;
+        player.x += p.dx; // move with moving platform
+      }
+    }
+  });
+
+  if (player.y > height + 100) gameState = "gameover";
+}
+
+// ---------------- Platform Updates ----------------
 function updatePlatforms() {
-  for (let p of platforms) {
+  platforms.forEach((p) => {
     if (p.type === "moving") {
       p.x += p.dx;
       if (p.x < 0 || p.x > width) p.dx *= -1;
-      if (p.spring) p.spring.x = p.x;
     }
-
-    if (p.type === "breaking" && p.broken) {
+    if ((p.type === "breakable" || p.type === "black") && p.broken) {
       p.y += 5;
-      if (p.spring) p.spring.y += 5;
     }
-  }
+  });
 
   for (let i = platforms.length - 1; i >= 0; i--) {
     if (platforms[i].y > height + 40) {
       platforms.splice(i, 1);
-      generatePlatform(random(50, width - 50), -20);
+      spawnPlatformAbove();
     }
   }
 }
 
 function drawPlatforms() {
-  rectMode(CENTER);
-
-  for (let p of platforms) {
-    if (p.type === "normal") fill(120, 70, 0);
-    else if (p.type === "moving") fill(80, 180, 255);
-    else if (p.type === "breaking") fill(255, 50, 50);
-
-    if (p.broken) fill(100);
-
-    rect(p.x, p.y, p.w, p.h);
-
-    // DRAW SPRING
-    if (p.spring && !p.spring.used) {
-      fill(0, 255, 0);
-      ellipse(p.spring.x, p.spring.y, p.spring.size, p.spring.size * 0.6);
-    }
-  }
+  platforms.forEach((p) => p.draw());
 }
 
-function drawPlayer() {
-  fill(0, 200, 0);
-  ellipse(player.x, player.y, player.size);
-}
-
+// ---------------- Controls ----------------
 function keyPressed() {
-  if (keyCode === ENTER) {
-    if (gameState === "start" || gameState === "gameover") {
-      startGame();
-      gameState = "playing";
+  if (
+    (gameState === "start" || gameState === "gameover") &&
+    keyCode === ENTER
+  ) {
+    initializeGame();
+    gameState = "playing";
+  }
+
+  if (gameState === "playing" && keyCode === UP_ARROW) {
+    if (!playerReadyToJump) {
+      playerReadyToJump = true;
+      player.vy = player.jumpPower;
+    } else if (player.onPlatform) {
+      player.vy = player.jumpPower;
+      player.onPlatform = false;
     }
   }
 }
