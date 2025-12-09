@@ -64,66 +64,6 @@ function spawnPlatformAbove() {
   platforms.push(new Platform(px, py, type));
 }
 
-// ---------------- Classes ----------------
-class Player {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.size = 30;
-    this.vx = 0;
-    this.vy = 0;
-    this.gravity = 0.6;
-    this.jumpPower = -12;
-    this.speed = 5;
-    this.onPlatform = true; // start on first grey platform
-  }
-
-  move() {
-    if (keyIsDown(LEFT_ARROW)) this.vx = -this.speed;
-    else if (keyIsDown(RIGHT_ARROW)) this.vx = this.speed;
-    else this.vx = 0;
-
-    this.x += this.vx;
-    this.y += this.vy;
-
-    // Apply gravity only if not on grey platform or already jumped
-    if (!this.onPlatform || playerReadyToJump) {
-      this.vy += this.gravity;
-    } else {
-      this.vy = 0;
-    }
-
-    if (this.x < 0) this.x = width;
-    if (this.x > width) this.x = 0;
-  }
-
-  draw() {
-    fill(255, 100, 100);
-    ellipse(this.x, this.y, this.size);
-  }
-}
-
-class Platform {
-  constructor(x, y, type) {
-    this.x = x;
-    this.y = y;
-    this.w = 80;
-    this.h = 15;
-    this.type = type;
-    this.broken = false;
-    this.dx = type === "moving" ? random(1, 3) : 0;
-  }
-
-  draw() {
-    if (this.type === "unbreakable") fill(150); // grey
-    else if (this.type === "breakable") fill(0, 200, 0); // green
-    else if (this.type === "black") fill(0); // black
-    else fill(0, 200, 0); // moving green
-    rectMode(CENTER);
-    rect(this.x, this.y, this.w, this.h, 5);
-  }
-}
-
 // ---------------- Game Loop ----------------
 function draw() {
   background(150, 200, 255);
@@ -260,5 +200,6 @@ function keyPressed() {
     }
   }
 }
+
 
 
