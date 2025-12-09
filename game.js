@@ -144,13 +144,13 @@ function handleCollisions() {
     ) {
       if (p.type === "unbreakable") {
         player.onPlatform = true;
-        player.vy = 0;
+        player.vy = player.jumpPower;
         player.y = p.y - player.size / 2 - p.h / 2; // snap to grey platform
       } else if (p.type === "breakable" || p.type === "black") {
-        player.vy = 0;
+        player.vy = player.jumpPower;
         p.broken = true; // green or black platform breaks
       } else if (p.type === "moving") {
-        player.vy = 0;
+        player.vy = player.jumpPower;
         player.x += p.dx; // move with moving platform
       }
     }
@@ -190,16 +190,12 @@ function keyPressed() {
     gameState = "playing";
   }
 
-  if (gameState === "playing" && keyCode === UP_ARROW) {
-    if (!playerReadyToJump) {
-      playerReadyToJump = true;
-      player.vy = player.jumpPower;
-    } else if (player.onPlatform) {
-      player.vy = player.jumpPower;
-      player.onPlatform = false;
-    }
+  if (gameState === "playing" && !playerReadyToJump) {
+      playerReadyToJump = true; 
+    
   }
 }
+
 
 
 
