@@ -40,7 +40,7 @@ function spawnPlatform() {
   while (!placed) {
     const px = random(50, width - 50);
     const py = random(50, height - 50);
-    const overlaps = platforms.some(p => math.abs(px - p.x) < 80 && math.abs(py - p.y) < 50);
+    const overlaps = platforms.some(p => Math.abs(px - p.x) < 80 && Math.abs(py - p.y) < 50);
     if (!overlaps) {
       const type = selectPlatformType();
       platforms.push(new Platform(px, py, type));
@@ -260,4 +260,5 @@ function keyPressed() {
     }
   }
 }
+
 
