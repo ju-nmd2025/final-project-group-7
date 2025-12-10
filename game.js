@@ -7,7 +7,7 @@ let score = 0;
 let gameState = "start";
 let playerReadyToJump = false;
 
-const NUM_PLATFORMS = 15;
+const NUM_PLATFORMS = 20;
 const PLATFORM_GAP = 70;
 
 // ---------------- Setup -----------------
@@ -192,6 +192,7 @@ function keyPressed() {
     
   }
 }
+
 
 
 
