@@ -10,10 +10,15 @@ export default class Platform {
   }
 
   draw() {
-    if (this.type === "unbreakable") fill(150); // grey
-    else if (this.type === "breakable") fill(0, 200, 0); // green
-    else if (this.type === "black") fill(0); // black
-    else fill(0, 200, 0); // moving green
+    if (this.type === "unbreakable") {
+      fill(150); // grey
+    } else if (this.type === "black") {
+      fill(0); // black (breakable)
+    } else if (this.type === "moving") {
+      fill(0, 200, 0); // green moving
+    } else {
+      fill(150); // fallback
+    }
 
     rectMode(CENTER);
     rect(this.x, this.y, this.w, this.h, 5);
