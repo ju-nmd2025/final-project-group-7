@@ -7,9 +7,10 @@ let score = 0;
 let gameState = "start";
 let playerReadyToJump = false;
 
-const NUM_PLATFORMS = 10;
+const NUM_PLATFORMS = 15;
+const PLATFORM_GAP = 70;
 
-// ---------------- Setup ----------------
+// ---------------- Setup -----------------
 function setup() {
   createCanvas(400, 600);
   initializeGame();
@@ -30,24 +31,19 @@ function initializeGame() {
 
   // Other platforms
   for (let i = 1; i < NUM_PLATFORMS; i++) {
-    spawnPlatform();
+    spawnPlatformAtDistance(i);
   }
 }
 
 // ---------------- Platform Functions ----------------
-function spawnPlatform() {
-  let placed = false;
-  while (!placed) {
+function spawnPlatformAtDistance(index) {
     const px = random(50, width - 50);
-    const py = random(50, height - 50);
-    const overlaps = platforms.some(p => Math.abs(px - p.x) < 80 && Math.abs(py - p.y) < 50);
-    if (!overlaps) {
-      const type = selectPlatformType();
-      platforms.push(new Platform(px, py, type));
-      placed = true;
-    }
+    const py = height - 50 - index * PLATFORM_GAP;
+    const type = selectPlatformType();
+    platforms.push(new Platform(px, py, type));
+  
   }
-}
+
 
 function selectPlatformType() {
   const r = random();
@@ -58,8 +54,9 @@ function selectPlatformType() {
 }
 
 function spawnPlatformAbove() {
+  const highest = platforms.reduce((a,b) => (a.y < b.y ? a: b));
   const px = random(50, width - 50);
-  const py = -20;
+  const py = highest.y - PLATFORM_GAP;
   const type = selectPlatformType();
   platforms.push(new Platform(px, py, type));
 }
@@ -195,6 +192,7 @@ function keyPressed() {
     
   }
 }
+
 
 
 
