@@ -8,6 +8,7 @@ let gameState = "start";
 let playerReadyToJump = false;
 
 const NUM_PLATFORMS = 15;
+const NUM_PLATFORMS = 20;
 const PLATFORM_GAP = 70;
 
 // ---------------- Setup -----------------
@@ -104,6 +105,7 @@ function playGame() {
   fill(0);
   textSize(20);
   text(`Score: ${score}`, 20, 30);
+  text(`Score: ${score}`, 60, 30);
 
   if (!playerReadyToJump) {
     fill(0);
