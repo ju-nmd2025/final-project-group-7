@@ -1,5 +1,3 @@
-import platform from "platform";
-
 export default class Platform {
   constructor(x, y, type) {
     this.x = x;
