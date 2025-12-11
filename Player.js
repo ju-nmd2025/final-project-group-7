@@ -38,3 +38,5 @@ export default class Player {
     ellipse(this.x, this.y, this.size);
   }
 }
+
+export { Player };

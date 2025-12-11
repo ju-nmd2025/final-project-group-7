@@ -1,3 +1,5 @@
+import platform from "platform";
+
 export default class Platform {
   constructor(x, y, type) {
     this.x = x;
@@ -24,3 +26,5 @@ export default class Platform {
     rect(this.x, this.y, this.w, this.h, 5);
   }
 }
+
+export { Platform };

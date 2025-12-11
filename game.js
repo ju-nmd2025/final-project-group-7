@@ -16,6 +16,8 @@ function setup() {
   initializeGame();
 }
 
+window.setup = setup;
+
 // ---------------- Initialize Game ----------------
 function initializeGame() {
   platforms = [];
@@ -192,13 +194,8 @@ function keyPressed() {
   }
 }
 
+window.draw = draw;
 
-
-
-<<<<<<< original
-=======
-
-
->>>>>>> main
-
-
+window.addEventListener("keydown", function(event) {
+  keyPressed();
+});
