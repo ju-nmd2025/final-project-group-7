@@ -196,6 +196,16 @@ function keyPressed() {
 
 window.draw = draw;
 
+window.keyPressed = keyPressed;
+
 window.addEventListener("keydown", function(event) {
-  keyPressed();
+  if ((gameState === "start" || gameState === "gameover") && event.key === "Enter") {
+    initializeGame();
+    gameState = "playing";
+    return;
+  }
+
+  if (gameState === "playing" && !playerReadyToJump && (event.key === "ArrowUp" || event.key === "Up")) {
+    playerReadyToJump = true;
+  }
 });
