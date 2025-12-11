@@ -12,7 +12,7 @@ export default class Player {
     this.onPlatform = true; // start on first grey platform
   }
 
-  move() {
+  move(playerReadyToJump) {
     // Horizontal movement
     if (keyIsDown(LEFT_ARROW)) this.vx = -this.speed;
     else if (keyIsDown(RIGHT_ARROW)) this.vx = this.speed;

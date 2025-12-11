@@ -93,7 +93,7 @@ function drawGameOverScreen() {
 
 // ---------------- Game Mechanics ----------------
 function playGame() {
-  player.move();
+  player.move(playerReadyToJump);
   if (playerReadyToJump) {
     scrollScreen();
     handleCollisions();
