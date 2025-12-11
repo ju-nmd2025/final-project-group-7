@@ -4,7 +4,7 @@ export default class Platform {
     this.y = y;
     this.w = 80;
     this.h = 15;
-    this.type = type; // "unbreakable", "breakable", "black", "moving"
+    this.type = type; // "unbreakable", "black", "moving"
     this.broken = false;
     this.dx = type === "moving" ? random(1, 3) : 0; // moving speed
   }

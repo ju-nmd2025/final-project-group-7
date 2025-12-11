@@ -48,7 +48,6 @@ function spawnPlatformAtDistance(index) {
 function selectPlatformType() {
   const r = random();
   if (r < 0.1) return "black"; // 10% black breakable
-  if (r < 0.25) return "breakable"; // 15% green breakable
   if (r < 0.4) return "moving"; // 15% green moving
   return "unbreakable"; // 60% grey unbreakable
 }
@@ -143,9 +142,9 @@ function handleCollisions() {
         player.onPlatform = true;
         player.vy = player.jumpPower;
         player.y = p.y - player.size / 2 - p.h / 2; // snap to grey platform
-      } else if (p.type === "breakable" || p.type === "black") {
+      } else if (p.type === "black") {
         player.vy = player.jumpPower;
-        p.broken = true; // green or black platform breaks
+        p.broken = true; // black platform breaks
       } else if (p.type === "moving") {
         player.vy = player.jumpPower;
         player.x += p.dx; // move with moving platform
@@ -163,7 +162,7 @@ function updatePlatforms() {
       p.x += p.dx;
       if (p.x < 0 || p.x > width) p.dx *= -1;
     }
-    if ((p.type === "breakable" || p.type === "black") && p.broken) {
+    if (p.type === "black" && p.broken) {
       p.y += 5;
     }
   });
